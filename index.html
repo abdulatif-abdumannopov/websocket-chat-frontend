@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Чат с JWT</title>
+    <link rel="stylesheet" href="css/style.css">
+<!--    <style>-->
+<!--        body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }-->
+<!--        input, button { margin: 5px 0; padding: 10px; width: 100%; }-->
+<!--        #chatList div { padding: 10px; border: 1px solid #ccc; margin: 5px 0; cursor: pointer; }-->
+<!--        #chat { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto; }-->
+<!--    </style>-->
+</head>
+<body>
+    <form method="post" class="sign_form">
+        <h1 class="sign_form_title">Войти</h1>
+        <input type="text" id="username_sign" class="sign_form_username" placeholder="Имя пользователя">
+        <input type="password" id="password_sign" class="sign_form_password" placeholder="Пароль">
+        <button class="sign_form_button">Войти</button>
+        <span class="sign_form_link">или <span class="sign_form_link_inner">зарегестрироваться</span></span>
+    </form>
+    <form method="post" class="registration_form">
+        <h1 class="sign_form_title_reg">Регистрация</h1>
+        <input type="text" id="username" class="sign_form_username" placeholder="Имя пользователя">
+        <input type="text" id="mail" class="sign_form_username" placeholder="Почта">
+        <input type="password" id="password" class="sign_form_password" placeholder="Пароль">
+        <button onclick="login()" class="reg_form_button">Отправить</button>
+        <span class="sign_form_link">или <span class="reg_form_link_inner">войти</span></span>
+    </form>
+    <div class="main_chats_body">
+        <div class="chats_body_container">
+            <div class="chats_tools">
+                <img class="chats_settings" src="images/menu_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg" alt="settings">
+                <input class="chats_search" type="search" placeholder="Поиск">
+            </div>
+            <div class="chats_box">
+
+            </div>
+        </div>
+        <div class="chat_screen">
+
+        </div>
+    </div>
+<!--    <h2>Ваши чаты</h2>-->
+<!--    <div id="chatList"></div>-->
+
+<!--    <h2 id="chatTitle">Чат</h2>-->
+<!--    <div id="chat"></div>-->
+
+<!--    <input type="text" id="messageInput" placeholder="Введите сообщение">-->
+<!--    <button onclick="sendMessage()">Отправить</button>-->
+    <script type="module" src="style.js"></script>
+    <script type="module" src="script.js"></script>
+<!--    <script>-->
+<!--document.addEventListener("DOMContentLoaded", () => {-->
+<!--    refreshAccessToken()-->
+<!--        .then(() => {-->
+<!--            loadChats();-->
+<!--            connectWebSocket();-->
+<!--        })-->
+<!--        .catch(() => console.log("Not authorized!"));-->
+<!--});-->
+
+<!--function login() {-->
+<!--    const username = document.getElementById('username').value;-->
+<!--    const password = document.getElementById('password').value;-->
+
+<!--    fetch("http://localhost:8080/login", {-->
+<!--        method: "POST",-->
+<!--        headers: { "Content-Type": "application/json" },-->
+<!--        body: JSON.stringify({ username, password })-->
+<!--    })-->
+<!--    .then(res => res.json())-->
+<!--    .then(data => {-->
+<!--        if (data.accessToken) {-->
+<!--            localStorage.setItem("accessToken", data.accessToken);-->
+<!--            localStorage.setItem("refreshToken", data.refreshToken);-->
+<!--            localStorage.setItem("username", username);-->
+<!--            connectWebSocket();-->
+<!--            loadChats();-->
+<!--        } else {-->
+<!--            console.error("Ошибка авторизации");-->
+<!--        }-->
+<!--    })-->
+<!--    .catch(err => console.error("Ошибка запроса:", err));-->
+<!--}-->
+
+<!--function connectWebSocket() {-->
+<!--    const token = localStorage.getItem('accessToken');-->
+<!--    if (!token) return console.error("Нет токена");-->
+
+<!--    ws = new WebSocket(`ws://localhost:8080/ws?token=${encodeURIComponent(token)}`);-->
+
+<!--    ws.onopen = () => console.log("✅ WebSocket подключён");-->
+<!--    ws.onerror = (err) => console.error("❌ WebSocket ошибка:", err);-->
+<!--    ws.onclose = () => console.log("🔴 WebSocket отключён");-->
+<!--    ws.onmessage = (event) => {-->
+<!--        const data = JSON.parse(event.data);-->
+<!--        if (data.action === "send_message") {-->
+<!--            receiveMessage(event.data);-->
+<!--        }else if (data.action === "delete_message"){-->
+<!--            removeMessage(data.message_id)-->
+<!--        }-->
+<!--        else if (data.action === "edit_message"){-->
+<!--            console.log(data)-->
+<!--            changeMessage(data.message_id, data.new_content)-->
+<!--        }-->
+<!--        else {-->
+<!--            console.log("Invalid action type");-->
+<!--        }-->
+<!--    };-->
+<!--&lt;!&ndash;}&ndash;&gt;-->
+
+<!--function sendMessage() {-->
+<!--    const messageInput = document.getElementById("messageInput");-->
+<!--    const message = messageInput.value.trim();-->
+<!--    if (!message || !ws) return;-->
+
+<!--    const username = localStorage.getItem("username");-->
+<!--    const recipient = localStorage.getItem("to");-->
+<!--    if (!recipient) return console.error("Не выбран чат!");-->
+
+<!--    const msgObj = { action: "send_message", from: username, to: recipient, content: message };-->
+<!--    ws.send(JSON.stringify(msgObj));-->
+<!--    messageInput.value = "";-->
+<!--}-->
+
+<!--function loadChats() {-->
+<!--    const token = localStorage.getItem("accessToken");-->
+<!--    if (!token) {-->
+<!--        console.error("❌ Ошибка: Токен отсутствует! Пользователь не авторизован.");-->
+<!--        return;-->
+<!--    }-->
+
+<!--    fetch("http://localhost:8080/get-chats", {-->
+<!--        method: "GET",-->
+<!--        headers: { "Authorization": `Bearer ${token}` }-->
+<!--    })-->
+<!--    .then(res => {-->
+<!--        if (res.status === 401) {-->
+<!--            console.warn("⚠️ Токен истёк, пробуем обновить...");-->
+<!--            return refreshAccessToken().then(loadChats);-->
+<!--        }-->
+<!--        if (!res.ok) throw new Error(`Ошибка HTTP: ${res.status}`);-->
+<!--        return res.json();-->
+<!--    })-->
+<!--    .then(chats => {-->
+<!--        if (!Array.isArray(chats)) throw new Error("Ответ сервера не является массивом!");-->
+
+<!--        const chatList = document.getElementById("chatList");-->
+<!--        chatList.innerHTML = "";-->
+<!--        chats.forEach(chat => {-->
+<!--            chatList.innerHTML += `<div onclick="openChat('${chat.username}')">-->
+<!--                <strong>${chat.username}</strong>: ${chat.last_message || "Нет сообщений"} <br>-->
+<!--                <small>${chat.timestamp ? new Date(chat.timestamp).toLocaleString() : "Неизвестное время"}</small>-->
+<!--            </div>`;-->
+<!--        });-->
+<!--    })-->
+<!--    .catch(err => console.error("❌ Ошибка загрузки чатов:", err));-->
+<!--}-->
+
+<!--function refreshAccessToken() {-->
+<!--    const refreshToken = localStorage.getItem("refreshToken");-->
+<!--    if (!refreshToken) {-->
+<!--        console.error("❌ Ошибка: Refresh-токен отсутствует!");-->
+<!--        return Promise.reject("Отсутствует refreshToken");-->
+<!--    }-->
+
+<!--    return fetch("http://localhost:8080/refresh", {-->
+<!--        method: "POST",-->
+<!--        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${refreshToken}` },-->
+<!--    })-->
+<!--    .then(res => {-->
+<!--        if (!res.ok) throw new Error(`Ошибка обновления токена: ${res.status}`);-->
+<!--        return res.json();-->
+<!--    })-->
+<!--    .then(data => {-->
+<!--        console.log("🔄 Токен обновлён!");-->
+<!--        localStorage.setItem("accessToken", data.accessToken);-->
+<!--        localStorage.setItem("refreshToken", data.refreshToken);-->
+<!--        return data.accessToken;-->
+<!--    })-->
+<!--    .catch(err => {-->
+<!--        console.log("❌ Ошибка обновления токена:", err);-->
+<!--        return Promise.reject(err);-->
+<!--    });-->
+<!--}-->
+
+<!--function openChat(username) {-->
+<!--    localStorage.setItem("to", username);-->
+<!--    document.getElementById("chatTitle").innerText = "Чат с " + username;-->
+<!--    document.getElementById("chat").innerHTML = "";-->
+<!--    loadMessages(username);-->
+<!--}-->
+
+<!--function loadMessages(username) {-->
+<!--    fetch(`http://localhost:8080/get-messages?user=${username}`, {-->
+<!--        method: "GET",-->
+<!--        headers: { "Authorization": "Bearer " + localStorage.getItem("accessToken") }-->
+<!--    })-->
+<!--    .then(res => res.json())-->
+<!--    .then(messages => {-->
+<!--        if (!Array.isArray(messages)) return;-->
+
+<!--        const chatBox = document.getElementById("chat");-->
+<!--        chatBox.innerHTML = "";-->
+<!--        messages.forEach(msg => {-->
+<!--            chatBox.innerHTML += `<div class="message-${msg.id}">-->
+<!--                <div><strong>${msg.from}:</strong> <span id="msg-content-${msg.id}">${msg.content}</span></div>-->
+<!--                <div>-->
+<!--                    <button onclick="editMessage(${msg.id})">Edit</button>-->
+<!--                    <button onclick="deleteMessage(${msg.id})">Delete</button>-->
+<!--                </div>-->
+<!--            </div>`;-->
+<!--        });-->
+<!--        chatBox.scrollTop = chatBox.scrollHeight;-->
+<!--    })-->
+<!--    .catch(err => console.error("Ошибка загрузки сообщений:", err));-->
+<!--}-->
+
+<!--function deleteMessage(id) {-->
+<!--    const message = { action: "delete_message", message_id: id };-->
+<!--    ws.send(JSON.stringify(message));-->
+<!--}-->
+
+<!--function removeMessage(id){-->
+<!--    let box = document.getElementsByClassName(`message-${id}`)-->
+<!--    box[0].remove()-->
+<!--}-->
+
+<!--function changeMessage(id, content){-->
+<!--    let box = document.querySelector(`#msg-content-${id}`)-->
+<!--    box.textContent = content-->
+<!--}-->
+
+<!--function editMessage(id) {-->
+<!--    const msgSpan = document.getElementById(`msg-content-${id}`);-->
+<!--    const newContent = prompt("Введите новый текст:", msgSpan.innerText);-->
+<!--    if (!newContent) return;-->
+
+<!--    const message = { action: "edit_message", message_id: id, new_content: newContent };-->
+<!--    ws.send(JSON.stringify(message));-->
+<!--}-->
+<!--function receiveMessage(data) {-->
+<!--    const chatBox = document.getElementById("chat");-->
+<!--    const msg = JSON.parse(data);-->
+<!--    console.log(msg)-->
+<!--    chatBox.innerHTML += `<div class="message-${msg.message_id}">-->
+<!--<div><strong>${msg.from}:</strong> <span id="msg-content-${msg.message_id}">${msg.content}</span></div>-->
+<!--<div>-->
+<!--    <button onclick="editMessage(${msg.message_id})">Edit</button>-->
+<!--    <button onclick="deleteMessage(${msg.message_id})">Delete</button>-->
+<!--</div>-->
+<!--</div>`;-->
+<!--    chatBox.scrollTop = chatBox.scrollHeight;-->
+<!--}-->
+
+<!--</script>-->
+
+</body>
+</html>
